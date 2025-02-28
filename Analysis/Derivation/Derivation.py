@@ -2,7 +2,7 @@
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 # Split the dataset into training and test sets
-x_train, x_test, t_train, t_test_light = train_test_split(x, t, test_size=0.2, random_state=42)
+x_train, x_test, t_train, t_test_light = train_test_split(x, t, test_size=0.2, random_state=####)
 
 # Train LightGBM model
 print("Training LightGBM model...")
