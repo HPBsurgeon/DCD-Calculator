@@ -38,14 +38,6 @@ Source code used to creat prediction model and validation in the paper is stored
 ### **Data Availability**
 The dataset used in this research is not publicly available due to regulatory restrictions. The data contains sensitive patient information, making it subject to legal and ethical constraints that prevent its public release.
 
-## **Contact**
-For inquiries or assistance, please contact the corresponding author:
-
-**Kazunari Sasaki, M.D.**  
-Email: sasakik@stanford.edu  
-
-For issues related to the repository, please open an issue on GitHub.
-
 ---
 
 **Disclaimer:** This repository is maintained for research and academic purposes only. The authors and institutions bear no responsibility for unintended usage.
