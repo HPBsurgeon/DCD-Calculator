@@ -33,7 +33,7 @@ Interpretation: This study demonstrates that an LGBM model can enhance predictiv
 Funding: None 
 
 ## **Software Implementation**
-Source code used to creat prediction model and validation in the paper is stored in the main repository folder. The calculations and figure generation are run inside Jupyter notebooks. 
+Source code used to creat prediction model and validation in the paper is stored in the main repository folder. 
 
 ### **Data Availability**
 The dataset used in this research is not publicly available due to regulatory restrictions. The data contains sensitive patient information, making it subject to legal and ethical constraints that prevent its public release.
