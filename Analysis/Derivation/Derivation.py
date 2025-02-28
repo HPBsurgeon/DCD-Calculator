@@ -222,8 +222,6 @@ for _ in range(n_splits):
 average_auc = np.mean(auc_scores)
 print(f"Average AUC over {n_splits} splits: {average_auc:.4f}")
 
-
-###search for maximum auc model
 auc_list=[]
 for _ in range(n_splits):
     x_train, x_test, t_train, t_test_light = train_test_split(x, t, test_size = 0.2)
