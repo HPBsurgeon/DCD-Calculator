@@ -23,9 +23,13 @@ Telephone: (650) 723-5454 (office)
 
 ## **Abstract**
 Background: Liver transplantation using Donation after Circulatory Death (DCD) donors continues to grow in popularity, easing the organ shortage. However, there remain high rates of unsuccessful organ procurements, aka "futile procurements," most commonly due to a donor not expiring within an acceptable time period after withdrawal of care. Futile procurements pose significant financial and workload challenges. This study aimed to develop and validate a machine learning-based model to predict donor expiration and reduce futile procurement.
-Methods: A retrospective dataset of 1,616 donors was used to develop a prediction model employing the Light Gradient Boosting Machine (LGBM). The model included neurological, biochemical, respiratory, and circulatory parameters as predictors and was validated retrospectively with 398 donors and prospectively with 207 donors across six U.S. transplant centers. Model performance was evaluated using the area under the curve (AUC), accuracy, futile procurement rate and missed opportunity rate. Performance was compared against established risk stratification models (DCD-N score, Colorado Calculator) and surgeon predictions. 
+
+Methods: A retrospective dataset of 1,616 donors was used to develop a prediction model employing the Light Gradient Boosting Machine (LGBM). The model included neurological, biochemical, respiratory, and circulatory parameters as predictors and was validated retrospectively with 398 donors and prospectively with 207 donors across six U.S. transplant centers. Model performance was evaluated using the area under the curve (AUC), accuracy, futile procurement rate and missed opportunity rate. Performance was compared against established risk stratification models (DCD-N score, Colorado Calculator) and surgeon predictions.
+
 Findings: Of the 2,211 DCD donors in this study, 1,260 expired. 903 (71·7%) expired within 30 minutes post-extubation. The LGBM model achieved AUCs of 0·83, 0·80, and 0·81 for predicting donor expiration at 30, 45, and 60 minutes post-extubation, respectively. This performance was maintained in both retrospective (AUCs: 0·83, 0·82, 0·80) and prospective (AUCs: 0·83, 0·81, 0·81) validation cohorts. The model reduced futile procurement rates compared to surgeons (0·08 vs. 0·20) and maintained superior accuracy in cases of poor inter-surgeon agreement (0·08 vs. 0·28). The missed opportunity rate was similar to that of surgeons (0·17 vs. 0·16).
+
 Interpretation: This study demonstrates that an LGBM model can enhance predictive accuracy, reduce futile procurements, and outperform surgeons and traditional methods. Further improvements are needed to decrease missed opportunities and strengthen overall model accuracy.
+
 Funding: None 
 
 ## **Software Implementation**
