@@ -2,11 +2,11 @@
 data_columns = ['#################################']
 #unet: dataframe
 
-# フィルタリング
+# filtering
 df1 = unet[unet['Validation'] != 'v'].dropna(subset=['recorder'])[data_columns]
 df2 = unet[unet['Validation'] == 'v'].dropna(subset=['recorder'])[data_columns]
 
-# 集計表を作成
+# cross table
 summary_table = pd.DataFrame(index=data_columns, columns=['Development Data', 'Retrospective Validation Data', 'p-value'])
 
 one_decimal_columns = ['#################################']
