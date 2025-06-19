@@ -92,3 +92,4 @@ general_model = lgb.train(
 # Final evaluation
 y_pred = general_model.predict(x_vali, num_iteration=general_model.best_iteration)
 print(f"Final AUC: {roc_auc_score(t_vali, y_pred):.4f}")
+
