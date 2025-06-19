@@ -14,6 +14,5 @@ This directory contains code to train and validate a LightGBM-based model for pr
 ```bash
 pip install -r requirements.txt
 
-2. Model training:
-python train_model.py
+
 
