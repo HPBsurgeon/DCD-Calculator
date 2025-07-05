@@ -23,6 +23,7 @@ import shap
 
 df1616 = pd.read_excel('derivation_2_1616.xlsx')
 df398 = pd.read_excel('retro_validation_2_398.xlsx')
+df207 = pd.read_excel('pros_validation_2_207.xlsx')
 
 unet = pd.concat([df1616, df398], axis=0, ignore_index=True)
 
@@ -888,7 +889,72 @@ plt.xticks(rotation=45, fontsize=19)
 # plt.savefig("Fig3b.pdf", format='pdf', dpi=400, bbox_inches='tight')
 plt.show()
 
+x_pros = pros.drop(['CSTATUS_60', 'CSTATUS_45', 'CSTATUS_30', 
+                    'ID','Survival_time','Status_120',], axis=1)
+t_pros = np.array(pros['CSTATUS_30'].tolist())
 
+scaled_pros = best_model.predict(x_pros)* 100
+
+print(roc_auc_score(t_pros, scaled_pros))
+
+thresholds = roc_curve(t_pros, scaled_pros)[2]
+best_cutoff = max(thresholds, key=lambda th: accuracy_score(t_pros, scaled_pros >= th))
+print(f"Best cutoff: {best_cutoff:.2f}")
+
+final_preds = (scaled_pros >= 52).astype(int)
+acc = accuracy_score(t_pros, final_preds)
+print(f"Accuracy: {acc:.4f}")
+
+tn, fp, fn, tp = confusion_matrix(t_pros, final_preds).ravel()
+total = len(t_pros)
+print(f"FPR (total): {fp / total:.4f}")
+print(f"FNR (total): {fn / total:.4f}")
+
+df = pros.copy()
+df['ML_predi'] = scaled_pros.tolist()
+df['ML_predi2'] = (df['ML_predi'] >= best_cutoff).astype(int)
+df['Match_Discrepancy'] = np.where(df['ML_predi2'] == df['CSTATUS_30'], 0, 1)
+bins = sorted(set([0, 20] + list(np.arange(30, df['ML_predi'].max() + 10, 10))))
+df['ML_predi_bins'] = pd.cut(df['ML_predi'], bins=bins, right=False)
+bin_counts = df.groupby('ML_predi_bins')['Match_Discrepancy'].sum()
+total_counts = df['ML_predi_bins'].value_counts().sort_index()
+percent_accuracy = (1 - bin_counts / total_counts) * 100
+
+# X-axis labels for percentage bins
+percent_labels = [f"{int(bin.left)}-{int(bin.right)}" for bin in total_counts.index]
+
+# Plotting the chart
+fig, ax1 = plt.subplots(figsize=(9, 7))
+
+# Bar chart (left Y-axis)
+colors = plt.cm.Blues(np.linspace(0.5, 0.9, len(total_counts))) 
+ax1.bar(percent_labels, total_counts, color=colors, width=0.6, label='Count')
+ax1.set_xlabel('LGBM Model Index', fontsize=20)
+ax1.set_ylabel('Count', fontsize=20)
+ax1.tick_params(axis='x', rotation=45, labelsize=15)
+ax1.tick_params(axis='y', labelsize=15)
+ax1.set_ylim(0, max(total_counts) + 10)  # Add extra space above bars for the legend
+
+# Line plot (right Y-axis)
+ax2 = ax1.twinx()
+ax2.plot(percent_labels, percent_accuracy, color='#1a5d8f', marker='o', label='Accuracy (%)')
+ax2.set_ylabel('Accuracy (%)', fontsize=17)
+ax2.tick_params(axis='y', labelsize=15)
+ax2.set_ylim(0, 100)
+
+# Add accuracy percentage above each point
+for i, acc in enumerate(percent_accuracy):
+    ax2.text(i, acc + 3, f"{acc:.1f}%", ha='center', fontsize=12, color='#1a5d8f')
+
+# Combine legends and place them in the empty space
+fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), fontsize=13, ncol=2)
+
+# Add title
+plt.title('Prospective Validation', fontsize=24)
+
+plt.tight_layout()
+plt.savefig("Fig5b.pdf", format='pdf', dpi=400, bbox_inches='tight')
+plt.show()
 
 
 
