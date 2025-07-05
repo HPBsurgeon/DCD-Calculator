@@ -119,7 +119,6 @@ plt.show()
 
 
 shap_values_list = []
-
 n = 10
 for i in range(n):
     dtrain = lgb.Dataset(x_train, label=t_train)
@@ -135,6 +134,124 @@ for i in range(n):
 mean_shap_values = np.mean(np.array(shap_values_list), axis=0)
 
 shap.summary_plot(mean_shap_values, x_train, feature_names=x.columns, plot_type="dot", max_display=20)
+
+shap_values_list = []
+n = 10
+for i in range(n):
+    x_train, x_test, t_train, t_test_light = train_test_split(x, t, test_size=0.2,
+                                                            #   random_state=i
+                                                              )
+    dtrain = lgb.Dataset(x_train, label=t_train)
+    dtest = lgb.Dataset(x_test, label=t_test_light)
+
+    params = {
+        'objective': 'binary',
+        'metric': 'auc',
+        'verbosity': -1,
+        'boosting_type': 'gbdt',
+        'early_stopping_rounds': 10
+    }
+
+    model_light = lgb.train(params, dtrain, valid_sets=dtest)
+    explainer = shap.Explainer(model_light, x_train)
+    shap_values = explainer(x_train)
+    shap_values_list.append(np.abs(shap_values.values))
+
+mean_shap_values = np.mean(np.array(shap_values_list), axis=0)
+feature_importance = np.mean(mean_shap_values, axis=0)
+
+importance_df = pd.DataFrame({
+    'Feature': x.columns,
+    'Importance': feature_importance
+}).sort_values(by='Importance', ascending=False)
+
+plt.figure(figsize=(10, 6))
+plt.barh(importance_df['Feature'], importance_df['Importance'])
+plt.gca().invert_yaxis()
+plt.title('Feature Importance based on SHAP values')
+plt.xlabel('Mean Absolute SHAP Value')
+plt.ylabel('Features')
+plt.tight_layout()
+plt.show()
+
+dtype_map = {
+    'GCS': 'float64',
+    'pupil': 'category',
+    'gag': 'category',
+    'corneal': 'category',
+    'cough': 'category',
+    'motor': 'category',
+    'OBV': 'category',
+    'end_MAP_category': 'Int64',
+    'end_Na_category': 'Int64',
+    'end_Plt_category': 'Int64',
+    'initial_PF_ratio_category': 'Int64',
+    'end_PF_ratio_category': 'Int64',
+    'end_ph_category': 'Int64',
+    'arrest_his': 'category',
+    'Mechanism_of_injury3': 'category',
+    'BMI_category': 'Int64'
+}
+
+for col, dtype in dtype_map.items():
+    if col in df1616.columns:
+        df1616[col] = df1616[col].astype(dtype)
+                
+df1616_3 = df1616[['Validation','UNET_ID','CSTATUS_60','CSTATUS_45','CSTATUS_30',
+                    'GCS','pupil','gag','corneal','cough','motor','OBV',
+                    'end_MAP_category','end_Na_category','end_Plt_category',
+                    'initial_PF_ratio_category','end_PF_ratio_category',
+                    'end_ph_category','arrest_his','Mechanism_of_injury3',
+                    'BMI_category']]
+
+df1616_3 = df1616_3.dropna(subset=df1616_3.columns.difference([
+            'GCS','pupil','gag','corneal','cough','motor','OBV']))
+df1616_3 = df1616_3.dropna(subset=[
+            'pupil','gag','corneal','cough','motor','OBV'], thresh=5)
+
+x = df1616_3.drop(['CSTATUS_60', 'CSTATUS_45', 'CSTATUS_30','UNET_ID','Validation'], axis=1)
+t = np.array(df1616_3['CSTATUS_30'].tolist())
+x_train, x_test, t_train, t_test_light = train_test_split(x, t, test_size = 0.2)
+
+##10times
+def LGMOptuna(trial):
+    random_state = trial.suggest_int('random_state', 1, 10000)#
+    dtrain = lgb.Dataset(x_train, label=t_train, weight=compute_sample_weight(class_weight='balanced', y=t_train).astype('float32'))
+    dtest = lgb.Dataset(x_test, label=t_test_light, weight=np.ones(len(x_test)).astype('float32'))
+    params = {
+      'objective':'binary',
+      'metric':'auc',
+      'verbosity':-1,
+      'boosting_type':'gbdt',
+      'random_state':trial.suggest_int('random_state', 1, 10000), #元々1500,
+      'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1, log=True),
+      'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+      'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+      'min_child_weight': trial.suggest_int('min_child_weight', 1, 10),
+      'reg_lambda': trial.suggest_float('reg_lambda', 1e-8, 10.0, log=True),
+      'reg_alpha': trial.suggest_float('reg_alpha', 1e-8, 10.0, log=True),
+      'early_stopping_rounds':10,
+      'verbose_eval': False,
+      }
+    model_light = lgb.train(params,
+                             dtrain,
+                             valid_sets = [dtrain, dtest],
+                            #  early_stopping_rounds=10,
+                            #  verbose_eval = False
+                             )
+    predicted_light = model_light.predict(x_test)
+    auc_l = roc_auc_score(t_test_light, predicted_light)
+    import pickle
+    # directory = '###
+    # with open(directory + '/model_light1.pickle', mode = 'wb') as f:
+    #     pickle.dump(model_light, f)    
+    return 1/auc_l
+
+study = optuna.create_study()
+optuna.logging.set_verbosity(optuna.logging.WARNING)
+study.optimize(LGMOptuna, 10)
+auc_light = 1/study.best_value
+1/study.best_value
 
 
 
