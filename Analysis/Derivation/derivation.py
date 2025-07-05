@@ -17,6 +17,8 @@ import pickle
 import optuna
 import optuna.integration.lightgbm as lgb
 
+import xgboost as xgb
+
 import itertools
 import shap
 
@@ -174,28 +176,26 @@ plt.ylabel('Features')
 plt.tight_layout()
 plt.show()
 
-dtype_map = {
-    'GCS': 'float64',
-    'pupil': 'category',
-    'gag': 'category',
-    'corneal': 'category',
-    'cough': 'category',
-    'motor': 'category',
-    'OBV': 'category',
-    'end_MAP_category': 'Int64',
-    'end_Na_category': 'Int64',
-    'end_Plt_category': 'Int64',
-    'initial_PF_ratio_category': 'Int64',
-    'end_PF_ratio_category': 'Int64',
-    'end_ph_category': 'Int64',
-    'arrest_his': 'category',
-    'Mechanism_of_injury3': 'category',
-    'BMI_category': 'Int64'
-}
+model = xgb.XGBClassifier(
+    objective='binary:logistic',  
+    eval_metric='logloss',        
+    max_depth=6,                 
+    learning_rate=0.05,           
+    subsample=0.8,                
+    colsample_bytree=0.9,         
+    n_estimators=100,             
+    random_state=42,              
+    early_stopping_rounds=10,
+    enable_categorical=True       
+)
 
-for col, dtype in dtype_map.items():
-    if col in df1616.columns:
-        df1616[col] = df1616[col].astype(dtype)
+model.fit(
+    x_train, t_train,
+    eval_set=[(x_train, t_train), (x_test, t_test)],  )
+
+y_pred = model.predict_proba(x_test)[:, 1]  
+auc_score = roc_auc_score(t_test, y_pred)
+print(f"ROC AUC: {auc_score}")
 
 
 df1616['CSTATUS_30'] = np.select(
@@ -298,6 +298,28 @@ df1616['end_ph_category'] = np.select(
     [1, 0, 2],
     default=np.nan)
 
+dtype_map = {
+    'GCS': 'float64',
+    'pupil': 'category',
+    'gag': 'category',
+    'corneal': 'category',
+    'cough': 'category',
+    'motor': 'category',
+    'OBV': 'category',
+    'end_MAP_category': 'Int64',
+    'end_Na_category': 'Int64',
+    'end_Plt_category': 'Int64',
+    'initial_PF_ratio_category': 'Int64',
+    'end_PF_ratio_category': 'Int64',
+    'end_ph_category': 'Int64',
+    'arrest_his': 'category',
+    'Mechanism_of_injury3': 'category',
+    'BMI_category': 'Int64'
+}
+
+for col, dtype in dtype_map.items():
+    if col in df1616.columns:
+        df1616[col] = df1616[col].astype(dtype)
 
 df1616_3 = df1616[['Validation','UNET_ID','CSTATUS_60','CSTATUS_45','CSTATUS_30',
                     'GCS','pupil','gag','corneal','cough','motor','OBV',
