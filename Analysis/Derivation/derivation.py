@@ -196,7 +196,109 @@ dtype_map = {
 for col, dtype in dtype_map.items():
     if col in df1616.columns:
         df1616[col] = df1616[col].astype(dtype)
-                
+
+
+df1616['CSTATUS_30'] = np.select(
+    [df1616['Survival_time'] <= 30,
+     df1616['Survival_time'] > 30],
+    [1, 0],
+    default=np.nan)
+
+df1616['CSTATUS_45'] = np.select(
+    [df1616['Survival_time'] <= 45,
+     df1616['Survival_time'] > 45],
+    [1, 0],
+    default=np.nan)
+
+df1616['CSTATUS_60'] = np.select(
+    [df1616['Survival_time'] < 60,
+     (df1616['Survival_time'] == 60) & (df1616['Status_120'] == 1),
+     df1616['Survival_time'] > 60],
+    [1, 1, 0],
+    default=np.nan)
+
+df1616['BMI'] = df1616['WGT_KG_DON_CALC'] / (df1616['HGT_CM_DON_CALC'] / 100) ** 2
+
+df1616['BMI_category'] = np.select(
+    [(df1616['BMI'] >= 0) & (df1616['BMI'] < 30),
+     (df1616['BMI'] >= 30)],
+    [0, 1],
+    default=np.nan)
+
+df1616['arrest_his'] = np.select(
+    [df1616['cardiac arrest'] == 'y',
+     df1616['cardiac arrest'].isin(['n', 'u'])],
+    [1, 0],
+    default=np.nan)
+
+df1616['O2_index2'] = df1616['end_FiO2'] * df1616['mean airway'] / df1616['end_PaO2']
+
+df1616['O2_index_new'] = np.select(
+    [df1616['O2_index2'] > 3.0,
+     df1616['O2_index2'] <= 3.0],
+    [1, 0],
+    default=np.nan)
+
+df1616['GCS_category'] = np.select(
+    [df1616['GCS'] == 3,
+     df1616['GCS'] >= 4],
+    [0, 1],
+    default=np.nan)
+
+df1616['end_MAP_category'] = np.select(
+    [df1616['end_MAP'] < 75,
+     df1616['end_MAP'] >= 75],
+    [1, 0],
+    default=np.nan)
+
+df1616['initial_PF_ratio_category'] = np.select(
+    [df1616['initial_PF_ratio'] >= 400,
+     (df1616['initial_PF_ratio'] >= 300) & (df1616['initial_PF_ratio'] < 400),
+     (df1616['initial_PF_ratio'] >= 200) & (df1616['initial_PF_ratio'] < 300),
+     (df1616['initial_PF_ratio'] >= 100) & (df1616['initial_PF_ratio'] < 200),
+     df1616['initial_PF_ratio'] < 100],
+    [0, 1, 2, 3, 4],
+    default=np.nan)
+
+df1616['end_PF_ratio_category'] = np.select(
+    [df1616['end_PF_ratio'] >= 400,
+     (df1616['end_PF_ratio'] >= 300) & (df1616['end_PF_ratio'] < 400),
+     (df1616['end_PF_ratio'] >= 200) & (df1616['end_PF_ratio'] < 300),
+     (df1616['end_PF_ratio'] >= 100) & (df1616['end_PF_ratio'] < 200),
+     df1616['end_PF_ratio'] < 100],
+    [0, 1, 2, 3, 4],
+    default=np.nan)
+
+df1616['end_Na_category'] = np.select(
+    [df1616['end_Na'] < 135,
+     (df1616['end_Na'] >= 135) & (df1616['end_Na'] < 146),
+     (df1616['end_Na'] >= 146) & (df1616['end_Na'] < 156),
+     df1616['end_Na'] >= 156],
+    [1, 0, 2, 3],
+    default=np.nan)
+
+df1616['end_Plt_category'] = np.select(
+    [df1616['end_Plt'] < 100,
+     (df1616['end_Plt'] >= 100) & (df1616['end_Plt'] < 150),
+     df1616['end_Plt'] >= 150],
+    [2, 1, 0],
+    default=np.nan)
+
+df1616['end_HCO3_category'] = np.select(
+    [df1616['end_HCO3'] < 18,
+     (df1616['end_HCO3'] >= 18) & (df1616['end_HCO3'] < 22),
+     df1616['end_HCO3'] >= 22],
+    [2, 1, 0],
+    default=np.nan)
+
+df1616['end_ph_category'] = np.select(
+    [df1616['end_ph'] < 7.35,
+     (df1616['end_ph'] >= 7.35) & (df1616['end_ph'] <= 7.45),
+     df1616['end_ph'] > 7.45],
+    [1, 0, 2],
+    default=np.nan)
+
+
 df1616_3 = df1616[['Validation','UNET_ID','CSTATUS_60','CSTATUS_45','CSTATUS_30',
                     'GCS','pupil','gag','corneal','cough','motor','OBV',
                     'end_MAP_category','end_Na_category','end_Plt_category',
