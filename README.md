@@ -1,6 +1,6 @@
 ### ⚠️ Status of Code Upload
 
-Please note that the full source code is currently being prepared and uploaded. Some modules and scripts referenced in the manuscript may not yet be available in this repository. The final version, corresponding to the Revision 2 submission to *The Lancet Digital Health*, will be fully updated shortly.
+Please note that the source code is currently being refined and organized to improve clarity and usability. While most core components are already available, some modules and scripts referenced in the manuscript are being polished for better readability and structure. A fully updated version, corresponding to the Revision 2 submission, will be available shortly.
 
 
 # **Development and Validation of a Machine Learning Model to Reduce Futile Procurements in Donations After Circulatory Death in Liver Transplantation: A National Multi-Center Study**
